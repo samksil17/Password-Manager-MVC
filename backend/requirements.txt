@@ -1,5 +1,9 @@
+cat > /mnt/user-data/outputs/requirements.txt << 'EOF'
 flask
 flask-sqlalchemy
 flask-cors
 gunicorn
 psycopg2-binary
+pymongo
+EOF
+echo "OK"
