@@ -1,109 +1,84 @@
-#Password Manager MVC
+# Password Manager — Evolución Full-Stack
 
-Gestor de contraseñas de escritorio desarrollado en python, aplicando el patrón de diseño MVC (Model-View-Controller) y principios de Programación Orientada a Objetos (POO).
-
-Proyecto desarrollado para la asignatura: Desarrollo de Aplicaciones con Acceso a Datos — Institución Universitaria Americana.
-
-
-
-## Descripción
-
-Password Manager MVC permite almacenar, consultar y eliminar credenciales (sitio, usuario y contraseña) de forma organizada y segura. Las contraseñas se cifran antes de guardarse, por lo que nunca se almacenan en texto plano.
-
-
-
-## Estructura del Proyecto
-
-Password-Manager-MVC/
-│
-├── main.py           # Punto de entrada de la aplicación
-├── modelo.py         # Capa de datos: lógica de negocio y persistencia
-├── vista.py          # Capa de presentación: interfaz gráfica (CustomTkinter)
-├── controlador.py    # Capa de control: coordina Modelo y Vista
-├── datos.json        # Archivo de persistencia (contraseñas cifradas)
-├── secreto.key       # Clave de cifrado generada automáticamente
-└── README.md
-
-
-## Patrón MVC — Diseño de la Aplicación
-
-El proyecto está organizado en tres capas bien definidas, siguiendo el patrón Model-View-Controller:
-
-###  Modelo (`modelo.py`)
-- Define la lógica de negocio y el acceso a datos.
-- Maneja la lectura y escritura en `datos.json`.
-- Implementa el cifrado y descifrado de contraseñas usando el algoritmo Fernet (AES-128 CBC)
-- Genera y gestiona la clave de cifrado (`secreto.key`).
-- No conoce la interfaz gráfica ni el controlador.**
-
-### Vista (`vista.py`)
-- Construida con CustomTkinter para una interfaz moderna con soporte para modo oscuro.
-- Muestra los formularios de entrada (sitio, usuario, contraseña).
-- Presenta la lista de credenciales almacenadas.
-- No contiene lógica de negocio: solo presenta información y captura acciones del usuario.
-
-### Controlador (`controlador.py`)
-- Actúa como intermediario entre el Modelo y la Vista.
-- Recibe los eventos de la Vista (clics de botones).
-- Llama al Modelo para guardar, listar o eliminar credenciales.
-- Devuelve los resultados a la Vista para mostrarlos.
-- Mantiene los controladores delgados: sin lógica de negocio ni SQL directo.
-
-### Main (`main.py`)
-- Punto de entrada único de la aplicación.
-- Crea la instancia del Controlador, que a su vez inicializa el Modelo y la Vista.
-- Lanza el bucle principal de la interfaz gráfica (`mainloop()`).
-
-
-## Seguridad y Cifrado
-
-| Aspecto | Detalle |
-|---|---|
-| Algoritmo | Fernet (AES-128 en modo CBC con HMAC-SHA256) |
-| Librería | `cryptography` |
-| Clave | Generada automáticamente en `secreto.key` (una sola vez) |
-| Persistencia | `datos.json` — las contraseñas se guardan como tokens cifrados |
-| Resultado | Si alguien abre `datos.json`, solo verá cadenas de bytes aleatorios |
-
-
-## Tecnologías Utilizadas
-
-| Librería | Uso |
-|---|---|
-| `customtkinter` | Interfaz gráfica moderna (modo oscuro, widgets personalizados) |
-| `cryptography` | Cifrado Fernet de contraseñas |
-| `json` | Persistencia de datos estructurados |
-| `os` | Gestión de rutas y verificación de archivos |
+Proyecto desarrollado para la asignatura **Desarrollo de Aplicaciones con Acceso a Datos**  
+Institución Universitaria Americana · 2026 · Autor: Samir Kalil
 
 ---
 
-## Instalación y Ejecución
+## Evolución del proyecto a lo largo del semestre
 
-### 1. Clona el repositorio con bash
-git clone https://github.com/samksil17/Password-Manager-MVC.git
-cd Password-Manager-MVC
+| Parcial | Stack | Persistencia | Interfaz |
+|---------|-------|--------------|---------|
+| Parcial 1 | Python + MVC | Archivos JSON (cifrado Fernet) | CustomTkinter (escritorio) |
+| Parcial 2 | Python + MVC | Base de datos relacional (MySQL) | CustomTkinter (escritorio) |
+| **Parcial 3** | **Flask + SQLAlchemy** | **PostgreSQL (Render)** | **Web — HTML + Bootstrap (GitHub Pages)** |
 
+---
 
-### 2. Instala las dependencias
+## Estructura del repositorio
+
+```
+Password-Manager-MVC/
+├── main.py           → Punto de entrada (Parcial 1)
+├── modelo.py         → Capa Modelo: JSON + cifrado Fernet (Parcial 1)
+├── vista.py          → Capa Vista: GUI con CustomTkinter (Parcial 1)
+├── controlador.py    → Capa Controlador (Parcial 1)
+├── backend/          → API REST - Parcial 3
+│   ├── app.py        → Controlador: rutas Flask + endpoints CRUD
+│   ├── models.py     → Modelo: ORM con SQLAlchemy (tabla Credential)
+│   └── requirements.txt
+└── docs/             → Frontend - Parcial 3
+    └── index.html    → Vista: HTML + Bootstrap + JavaScript (fetch API)
+```
+
+---
+
+## Parcial 3 — Aplicación Web Full-Stack
+
+### Arquitectura MVC web
+
+```
+[Vista]        docs/index.html      HTML + Bootstrap + JS (GitHub Pages)
+   ↓ fetch()
+[Controlador]  backend/app.py       Rutas Flask (API REST)
+   ↓ ORM
+[Modelo]       backend/models.py    SQLAlchemy → PostgreSQL (Render)
+```
+
+### Endpoints de la API
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/credentials` | Lista todas las credenciales |
+| POST | `/credentials` | Crea una nueva credencial |
+| GET | `/credentials/<id>` | Obtiene una credencial por ID |
+| PUT | `/credentials/<id>` | Actualiza una credencial |
+| DELETE | `/credentials/<id>` | Elimina una credencial |
+
+### Correr el backend localmente
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+python app.py
+```
+
+API disponible en `http://localhost:5000`
+
+---
+
+## Despliegues
+
+- **Backend (API):** https://password-manager-backend.onrender.com
+- **Frontend:** https://samksil17.github.io/Password-Manager-MVC
+
+---
+
+## Parcial 1 — Aplicación de escritorio
+
+```bash
 pip install customtkinter cryptography
-
-### 3. Ejecuta la aplicación
 python main.py
-
-
-> La primera vez se generará automáticamente el archivo `secreto.key`. No lo elimines o perderás acceso a las contraseñas guardadas.
-
-
-## Funcionalidades
-
-- Agregar credenciales (sitio, usuario, contraseña)
-- Listar todas las credenciales almacenadas
-- Eliminar credenciales
-- Contraseñas cifradas con Fernet
-- Interfaz gráfica moderna con CustomTkinter
-- Persistencia en archivo JSON local
-
-## Autor
-
-Samir Kalil 
-Institución Universitaria Americana — 2026
+```
