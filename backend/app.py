@@ -143,6 +143,13 @@ def get_logs():
     return jsonify(historial), 200
  
  
+ # Endpoint temporal para limpiar datos de prueba
+@app.route('/reset', methods=['GET'])
+def reset():
+    db.session.query(Credential).delete()
+    db.session.commit()
+    return jsonify({'message': 'Base de datos limpiada'}), 200
+
 # INICIO 
 if __name__ == '__main__':
     app.run(debug=True)
