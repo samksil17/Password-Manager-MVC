@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 CORS(app)
  
-# ─── BASE DE DATOS RELACIONAL (PostgreSQL / SQLite) via SQLAlchemy ────────────
+#  BASE DE DATOS RELACIONAL (PostgreSQL / SQLite) via SQLAlchemy 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///passwords.db')
 if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
@@ -20,22 +20,32 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
  
-# ─── BASE DE DATOS NO RELACIONAL (MongoDB Atlas) via PyMongo ──────────────────
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
-mongo_client = MongoClient(MONGO_URL)
-mongo_db     = mongo_client['password_manager']
-logs         = mongo_db['logs']   # colección de auditoría
- 
+#  BASE DE DATOS NO RELACIONAL (MongoDB Atlas) via PyMongo 
+try:
+    MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
+    mongo_client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000, tls=True, tlsAllowInvalidCertificates=True)
+    mongo_db     = mongo_client['password_manager']
+    logs         = mongo_db['logs']
+    mongo_client.admin.command('ping')
+    print("MongoDB conectado OK")
+except Exception as e:
+    print(f"MongoDB no disponible: {e}")
+    logs = None
+
 def registrar_log(accion, datos):
-    """Registra cada operación CRUD en MongoDB como auditoría."""
-    logs.insert_one({
-        'accion':    accion,          # 'CREAR', 'ACTUALIZAR', 'ELIMINAR'
-        'datos':     datos,           # qué se modificó
-        'timestamp': datetime.utcnow()
-    })
+    if logs is None:
+        return
+    try:
+        logs.insert_one({
+            'accion':    accion,
+            'datos':     datos,
+            'timestamp': datetime.utcnow()
+        })
+    except Exception as e:
+        print(f"Log no registrado: {e}")
  
  
-# ─── ENDPOINTS ────────────────────────────────────────────────────────────────
+# ENDPOINTS 
  
 # GET /credentials → listar todas las credenciales
 @app.route('/credentials', methods=['GET'])
@@ -129,7 +139,7 @@ def get_logs():
     return jsonify(historial), 200
  
  
-# ─── INICIO ───────────────────────────────────────────────────────────────────
+# INICIO 
 if __name__ == '__main__':
     app.run(debug=True)
  
